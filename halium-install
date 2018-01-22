@@ -80,8 +80,8 @@ cleanup()
 cleanup_device()
 {
 	[ -e $WORKDIR/device-clean ] && return
-	do_shell "umount /cache/system/ && rm -rf /cache/system"
-	do_shell "rm -f /recovery/$TARBALL"
+	do_shell "umount /cache/system/ && rmdir /cache/system"
+	do_shell "rm -f /sdcard/$TARBALL"
 	[ -e $WORKDIR ] && touch $WORKDIR/device-clean 2>/dev/null || true
 }
 
@@ -162,13 +162,13 @@ check_mounts
 WORKDIR=$(mktemp -d /tmp/halium-install.XXXXX)
 
 echo "transfering rootfs tarball ... "
-adb push $TARPATH /recovery/
+adb push $TARPATH /sdcard/
 echo "[done]"
 
 if [ ! -z "$CUST_TARPATH" ]; then
 	CUST_TARBALL=$(basename $CUST_TARPATH)
 	echo  -n "transferring custom tarball"
-	adb push $CUST_TARPATH /recovery/
+	adb push $CUST_TARPATH /sdcard/
 	echo "[done]"
 fi
 
@@ -177,7 +177,7 @@ prepare_halium_system
 echo "[done]"
 
 echo -n "unpacking rootfs tarball to system-image ... "
-do_shell "cd /cache/system && zcat /recovery/$TARBALL | tar xf -"
+do_shell "cd /cache/system && zcat /sdcard/$TARBALL | tar xf -"
 do_shell "[ -e /cache/system/SWAP.swap ] && mv /cache/system/SWAP.swap /data/SWAP.img"
 echo "[done]"
 
