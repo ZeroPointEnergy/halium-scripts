@@ -27,8 +27,7 @@ SYSIMG=$2
 
 check_prereq()
 {
-	if [ ! $(which make_ext4fs) ] || [ ! -x $(which simg2img) ] || \
-		[ ! -x $(which adb) ]; then
+	if [ ! -x $(which simg2img) ] || [ ! -x $(which adb) ]; then
 		echo "please install the android-tools-fsutils and android-tools-adb packages" && exit 1
 	fi
 }
@@ -41,10 +40,8 @@ do_shell()
 convert_android_img()
 {
 	if file $SYSIMG | grep -v ": Linux rev 1.0 ext4" >/dev/null; then
-		simg2img $SYSIMG $WORKDIR/system.img.raw
-		mkdir $TMPMOUNT
-		mount -t ext4 -o loop $WORKDIR/system.img.raw $TMPMOUNT
-		make_ext4fs -l 160M $WORKDIR/system.img $TMPMOUNT
+		simg2img $SYSIMG $WORKDIR/system.img
+		resize2fs -M $WORKDIR/system.img
 		SYSIMAGE=$WORKDIR/system.img
 	else
 		SYSIMAGE=$SYSIMG
@@ -75,7 +72,6 @@ cleanup()
 {
 	echo
 	echo "cleaning up"
-	mount | grep -q $TMPMOUNT 2>/dev/null && umount $TMPMOUNT
 	cleanup_device
 	rm -rf $WORKDIR
 	echo
@@ -168,7 +164,6 @@ fi
 check_mounts
 
 WORKDIR=$(mktemp -d /tmp/halium-install.XXXXX)
-TMPMOUNT="$WORKDIR/tmpmount"
 
 echo "transfering rootfs tarball ... "
 adb push $TARPATH /recovery/
