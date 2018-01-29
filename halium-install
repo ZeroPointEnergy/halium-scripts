@@ -98,8 +98,6 @@ usage()
 	exit 1
 }
 
-SUDOARGS="$@"
-
 while [ $# -gt 0 ]; do
 	case "$1" in
 		-h|--help)
@@ -151,8 +149,6 @@ if [ ! -z "$CUST_TARPATH" ] && \
 	echo "Custom tarball needs to be valid path and type .tar.xz"
 	usage
 fi
-
-[ $(id -u) -ne 0 ] && exec sudo $0 $SUDOARGS
 
 check_prereq
 
